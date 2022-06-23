@@ -107,7 +107,7 @@ rule fastqc_posttrim_r2:
 rule bwa_mem:
     input:
         #reads=[inputdirectory+"/Sample_{sample}/{sample}_R1_clipped_passed-re-filter.fastq.bz2", inputdirectory+"/Sample_{sample}/{sample}_R2_clipped_passed-re-filter.fastq.bz2"]
-        reads=[ancient("uncompressed/{sample}_R1_clipped_passed-re-filter.fastq"), ancient("uncompressed/{sample}_R2_clipped_passed-re-filter.fastq")]
+        reads=[ancient("uncompressed/{sample}_R1_clipped_passed-re-filter.fastq"), ancient("uncompressed/{sample}_R2_clipped_passed-re-filter.fastq")],
         "genome.amb",
     output:
         "mapped/{sample}.sorted.bam"
