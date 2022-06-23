@@ -39,11 +39,7 @@ rule bwa_index:
     input:
         ref
     output:
-        "genome.amb",
-        "genome.ann",
-        "genome.bwt",
-        "genome.pac",
-        "genome.sa"
+        idx=multiext("{genome}", ".amb", ".ann", ".bwt", ".pac", ".sa"),
     log:
         "logs/bwa_index/genome.log"
     params:
@@ -51,7 +47,7 @@ rule bwa_index:
         algorithm="bwtsw"
     resources: time_min=520, mem_mb=20000, cpus=1
     wrapper:
-        "0.73.0/bio/bwa/index"
+        "v1.7.0/bio/bwa/index"
 
 rule uncompress_fastq_r1:
     input:
