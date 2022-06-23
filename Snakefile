@@ -108,7 +108,7 @@ rule bwa_mem:
     input:
         #reads=[inputdirectory+"/Sample_{sample}/{sample}_R1_clipped_passed-re-filter.fastq.bz2", inputdirectory+"/Sample_{sample}/{sample}_R2_clipped_passed-re-filter.fastq.bz2"]
         reads=[ancient("uncompressed/{sample}_R1_clipped_passed-re-filter.fastq"), ancient("uncompressed/{sample}_R2_clipped_passed-re-filter.fastq")],
-        "genome.amb",
+        idx=multiext("genome", ".amb", ".ann", ".bwt", ".pac", ".sa"),
     output:
         "mapped/{sample}.sorted.bam"
     log:
@@ -122,7 +122,7 @@ rule bwa_mem:
     threads: 16
     resources: time_min=1320, mem_mb=20000, cpus=16
     wrapper:
-        "0.73.0/bio/bwa/mem"
+        "v1.7.0/bio/bwa/mem"
 
 
 rule samtools_index:
