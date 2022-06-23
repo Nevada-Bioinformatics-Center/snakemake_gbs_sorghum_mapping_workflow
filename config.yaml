@@ -1,0 +1,3 @@
+#path to basespace files
+input_data: "/data/gpfs/assoc/inbre/projects/melinda_yerka/gbs_sorghum/input_gbs_data"
+ref: "/data/gpfs/assoc/inbre/hansvg/common_references/sbicolor_454_v3.0.1/Sbicolor_454_v3.0.1.fa"
