@@ -143,7 +143,7 @@ rule fastqc_posttrim_r2:
 
 rule bwa_mem:
     input:
-        reads=[ancient("uncompressed/{sample}_R1_clipped_passed-re-filter.fastq"), ancient("uncompressed/{sample}_R2_clipped_passed-re-filter.fastq")],
+        reads=[ancient("uncompressed/{sample}_R1.fq"), ancient("uncompressed/{sample}_R2.fq")],
         idx=multiext("genome", ".amb", ".ann", ".bwt", ".pac", ".sa"),
     output:
         "mapped/{sample}.bam"
