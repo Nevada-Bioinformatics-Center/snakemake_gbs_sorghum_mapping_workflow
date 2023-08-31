@@ -3,6 +3,6 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bcftools ==1.12
+  - bcftools ==1.17
   - matplotlib ==3.4.1
   - tectonic ==0.4.1
