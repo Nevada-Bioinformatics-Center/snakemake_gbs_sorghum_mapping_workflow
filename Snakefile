@@ -4,12 +4,18 @@ configfile: "config.yaml"
 
 inputdirectory=config["input_data"]
 ref=config["ref"]
+R1pattern=config["R1pattern"]
+R2pattern=config["R2pattern"]
 print(inputdirectory)
-SAMPLES, =glob_wildcards(inputdirectory+"/{sample}_R1_clipped_passed-re-filter.fastq.bz2", followlinks=True)
+SAMPLES_GZ, =glob_wildcards(inputdirectory+"/{sample}"+R1pattern+".gz", followlinks=True)
+SAMPLES_BZ2, =glob_wildcards(inputdirectory+"/{sample}"+R1pattern+".bz2", followlinks=True)
+
+SAMPLES=SAMPLES_GZ + SAMPLES_BZ2
+
+print("GZ samples:", SAMPLES_GZ)
+print("BZ2 samples:", SAMPLES_BZ2)
 
 wrappers_version="v2.6.0"
-
-print(SAMPLES)
 
 ##### target rules #####
 rule all:
@@ -62,31 +68,53 @@ rule bwa_index:
         #"v1.7.0/bio/bwa/index"
         f"{wrappers_version}/bio/bwa/index"
 
-rule uncompress_fastq_r1:
+rule uncompress_fastq_r1_bz2:
     input:
-        inputdirectory+"/{sample}_R1_clipped_passed-re-filter.fastq.bz2"
+        inputdirectory+"/{sample}"+R1pattern+".bz2"
     output:
-        temp("uncompressed/{sample}_R1_clipped_passed-re-filter.fastq")
+        temp("uncompressed/{sample}_R1.fq")
     log:
         "logs/uncompress/{sample}_R1.log"
     threads: 1
     shell:
         "bzcat {input} > {output} 2> {log}"
 
-rule uncompress_fastq_r2:
+rule uncompress_fastq_r2_bz2:
     input:
-        inputdirectory+"/{sample}_R2_clipped_passed-re-filter.fastq.bz2"
+        inputdirectory+"/{sample}"+R2pattern+".bz2"
     output:
-        temp("uncompressed/{sample}_R2_clipped_passed-re-filter.fastq")
+        temp("uncompressed/{sample}_R2.fq")
     log:
         "logs/uncompress/{sample}_R2.log"
     threads: 1
     shell:
         "bzcat {input} > {output} 2> {log}"
 
+rule uncompress_fastq_r1_gz:
+    input:
+        inputdirectory+"/{sample}"+R1pattern+".gz"
+    output:
+        temp("uncompressed/{sample}_R1.fq")
+    log:
+        "logs/uncompress/{sample}_R1.log"
+    threads: 1
+    shell:
+        "zcat {input} > {output} 2> {log}"
+
+rule uncompress_fastq_r2_gz:
+    input:
+        inputdirectory+"/{sample}"+R2pattern+".gz"
+    output:
+        temp("uncompressed/{sample}_R2.fq")
+    log:
+        "logs/uncompress/{sample}_R2.log"
+    threads: 1
+    shell:
+        "zcat {input} > {output} 2> {log}"
+
 rule fastqc_posttrim_r1:
     input:
-        "uncompressed/{sample}_R1_clipped_passed-re-filter.fastq"
+        "uncompressed/{sample}_R1.fq"
     output:
         html="qc/fastqc_posttrim/{sample}_r1.html",
         zip="qc/fastqc_posttrim/{sample}_r1_fastqc.zip" # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
@@ -100,7 +128,7 @@ rule fastqc_posttrim_r1:
 
 rule fastqc_posttrim_r2:
     input:
-        "uncompressed/{sample}_R2_clipped_passed-re-filter.fastq"
+        "uncompressed/{sample}_R2.fq"
     output:
         html="qc/fastqc_posttrim/{sample}_r2.html",
         zip="qc/fastqc_posttrim/{sample}_r2_fastqc.zip" # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename

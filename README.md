@@ -1,4 +1,4 @@
-# Snakemake workflow: snakemake_basespace_merge_qc
+# snakemake_gbs_sorghum_mapping_workflow
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.2.1-brightgreen.svg)](https://snakemake.bitbucket.io)
 
@@ -41,4 +41,3 @@ or
     snakemake --use-conda --drmaa --jobs 100
 
 See the [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/executable.html) for further details.
-# snakemake_gbs_sorghum_mapping_workflow
