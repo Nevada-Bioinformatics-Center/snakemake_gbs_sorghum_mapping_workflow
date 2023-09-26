@@ -21,16 +21,20 @@ wrappers_version="v2.6.0"
 rule all:
     input: 
        "calls/all_merged.vcf.gz",
-       expand("calls/{sample}.vcf.gz", sample=SAMPLES),
+       #expand("calls/{sample}.vcf.gz", sample=SAMPLES),
        "calls/all_merged.q20dp8.imiss",
        "calls/all_merged.q20dp8mis50.imiss",
        "calls/all_merged.q20dp4.imiss",
-       "calls/all_merged.q20dp8mis50.noindels.vcf.gz",
-       "stats/all_merged.q20dp8mis50.noindels.vcf.gz.stats",
-       "stats/all_merged.q20dp8mis50.vcf.gz.stats",
-       "stats/all_merged.q20dp8.vcf.gz.stats",
+       #"calls/all_merged.q20dp8mis50.noindels.vcf.gz",
        "stats/all_merged.vcf.gz.stats",
+       "stats/all_merged.q20dp8.vcf.gz.stats",
+       "stats/all_merged.q20dp8mis50.vcf.gz.stats",
+       "stats/all_merged.q20dp8mis50.noindels.vcf.gz.stats",
        "stats/all_merged.q20dp8mis50.noindels.phased.vcf.gz.stats",
+       "stats/all_merged.q20dp4.vcf.gz.stats",
+       "stats/all_merged.q20dp4mis50.vcf.gz.stats",
+       "stats/all_merged.q20dp4mis50.noindels.vcf.gz.stats",
+       "stats/all_merged.q20dp4mis50.noindels.phased.vcf.gz.stats",
        #"calls/all_merged.bysample.vcf.gz",
        #"calls/all_merged.q20dp4.vcf.gz"
        #"calls/all_merged.q20dp8.vcf.gz",
@@ -170,7 +174,7 @@ rule sambamba_sort:
     log:
         "logs/sambamba-sort/{sample}.log"
     threads: 16
-    resources: time_min=320, mem_mb=20000, cpus=16
+    resources: time_min=320, mem_mb=40000, cpus=16
     wrapper:
         f"{wrappers_version}/bio/sambamba/sort"
 
@@ -307,23 +311,6 @@ rule filter_vcf_dp8:
     wrapper:
         f"{wrappers_version}/bio/vcftools/filter"
 
-rule filter_vcf_dp4:
-    input:
-        "calls/all_merged.vcf.gz"
-    output:
-        "calls/all_merged.q20dp4.vcf.gz"
-    log:
-        "logs/filter/vcftools_q20dp4.log"
-    resources: time_min=220, mem_mb=8000, cpus=1
-    threads: 1
-    params:
-        #Filters for minquality of 20, 
-        #min depth of 8 (from LGC), minimum allele frequency of 0.05
-        extra="--minQ 20 --minDP 4 --maf 0.05 --recode-INFO-all"
-    wrapper:
-        f"{wrappers_version}/bio/vcftools/filter"
-
-
 rule filter_vcf_dp8miss50:
     input:
         "calls/all_merged.vcf.gz"
@@ -354,38 +341,85 @@ rule filter_vcf_dp8miss50noindels:
     shell:
         "vcftools --gzvcf {input} --remove-indels --recode --recode-INFO-all --stdout | gzip -c > {output} 2> {log}"
 
-rule filter_vcfmiss25:
+rule filter_vcf_dp4:
     input:
         "calls/all_merged.vcf.gz"
     output:
-        "calls/all_merged.q20dp8mis25.vcf.gz"
+        "calls/all_merged.q20dp4.vcf.gz"
     log:
-        "logs/filter/vcftools_q20dp8miss50.log"
+        "logs/filter/vcftools_q20dp4.log"
     resources: time_min=220, mem_mb=8000, cpus=1
     threads: 1
     params:
         #Filters for minquality of 20, 
         #min depth of 8 (from LGC), minimum allele frequency of 0.05
-        extra="--minQ 20 --minDP 8 --maf 0.05 --max-missing 0.25 --recode-INFO-all"
+        extra="--minQ 20 --minDP 4 --maf 0.05 --recode-INFO-all"
     wrapper:
         f"{wrappers_version}/bio/vcftools/filter"
 
-
-rule filter_vcfmiss75:
+rule filter_vcf_dp4miss50:
     input:
         "calls/all_merged.vcf.gz"
     output:
-        "calls/all_merged.q20dp8mis75.vcf.gz"
+        "calls/all_merged.q20dp4mis50.vcf.gz"
     log:
-        "logs/filter/vcftools_q20dp8miss75.log"
-    resources: time_min=220, mem_mb=10000, cpus=1
+        "logs/filter/vcftools_q20dp4miss50.log"
+    resources: time_min=220, mem_mb=8000, cpus=1
     threads: 1
     params:
         #Filters for minquality of 20, 
         #min depth of 8 (from LGC), minimum allele frequency of 0.05
-        extra="--minQ 20 --minDP 8 --maf 0.05 --max-missing 0.75 --recode-INFO-all"
+        extra="--minQ 20 --minDP 8 --maf 0.05 --max-missing 0.5 --recode-INFO-all"
     wrapper:
         f"{wrappers_version}/bio/vcftools/filter"
+
+rule filter_vcf_dp4miss50noindels:
+    input:
+        "calls/all_merged.q20dp4mis50.vcf.gz"
+    output:
+        "calls/all_merged.q20dp4mis50.noindels.vcf.gz"
+    log:
+        "logs/filter/vcftools_q20dp4miss50.log"
+    resources: time_min=220, mem_mb=8000, cpus=1
+    threads: 1
+    conda:
+        "envs/vcftools.yaml"
+    shell:
+        "vcftools --gzvcf {input} --remove-indels --recode --recode-INFO-all --stdout | gzip -c > {output} 2> {log}"
+
+
+#rule filter_vcfmiss25:
+#    input:
+#        "calls/all_merged.vcf.gz"
+#    output:
+#        "calls/all_merged.q20dp8mis25.vcf.gz"
+#    log:
+#        "logs/filter/vcftools_q20dp8miss50.log"
+#    resources: time_min=220, mem_mb=8000, cpus=1
+#    threads: 1
+#    params:
+#        #Filters for minquality of 20, 
+#        #min depth of 8 (from LGC), minimum allele frequency of 0.05
+#        extra="--minQ 20 --minDP 8 --maf 0.05 --max-missing 0.25 --recode-INFO-all"
+#    wrapper:
+#        f"{wrappers_version}/bio/vcftools/filter"
+#
+#
+#rule filter_vcfmiss75:
+#    input:
+#        "calls/all_merged.vcf.gz"
+#    output:
+#        "calls/all_merged.q20dp8mis75.vcf.gz"
+#    log:
+#        "logs/filter/vcftools_q20dp8miss75.log"
+#    resources: time_min=220, mem_mb=10000, cpus=1
+#    threads: 1
+#    params:
+#        #Filters for minquality of 20, 
+#        #min depth of 8 (from LGC), minimum allele frequency of 0.05
+#        extra="--minQ 20 --minDP 8 --maf 0.05 --max-missing 0.75 --recode-INFO-all"
+#    wrapper:
+#        f"{wrappers_version}/bio/vcftools/filter"
 
 
 rule bcftstats_origfile:
@@ -426,7 +460,7 @@ rule bcftstats_q20dp8mis50:
     output:
         "stats/all_merged.q20dp8mis50.vcf.gz.stats"
     log:
-        "logs/filter/bcfstats_q20dp8mis50noindels.log"
+        "logs/filter/bcfstats_q20dp8mis50.log"
     resources: time_min=220, mem_mb=8000, cpus=1
     threads: 1
     conda:
@@ -463,6 +497,67 @@ rule bcftstats_q20dp8mis50noindelsphased:
         "envs/bcftools.yaml"
     shell:
         "bcftools stats -F {input.fa} -s - {input.vcf} > {output} 2> {log}"
+
+rule bcftstats_q20dp4:
+    input:
+        vcf="calls/all_merged.q20dp4.vcf.gz",
+        fa=ref
+    output:
+        "stats/all_merged.q20dp4.vcf.gz.stats"
+    log:
+        "logs/filter/bcfstats_dp4.log"
+    resources: time_min=220, mem_mb=8000, cpus=1
+    threads: 1
+    conda:
+        "envs/bcftools.yaml"
+    shell:
+        "bcftools stats -F {input.fa} -s - {input.vcf} > {output} 2> {log}"
+
+rule bcftstats_q20dp4mis50:
+    input:
+        vcf="calls/all_merged.q20dp4mis50.vcf.gz",
+        fa=ref
+    output:
+        "stats/all_merged.q20dp4mis50.vcf.gz.stats"
+    log:
+        "logs/filter/bcfstats_q20dp4mis50.log"
+    resources: time_min=220, mem_mb=8000, cpus=1
+    threads: 1
+    conda:
+        "envs/bcftools.yaml"
+    shell:
+        "bcftools stats -F {input.fa} -s - {input.vcf} > {output} 2> {log}"
+
+rule bcftstats_q20dp4mis50noindels:
+    input:
+        vcf="calls/all_merged.q20dp4mis50.noindels.vcf.gz",
+        fa=ref
+    output:
+        "stats/all_merged.q20dp4mis50.noindels.vcf.gz.stats"
+    log:
+        "logs/filter/bcfstats_q20dp4mis50noindels.log"
+    resources: time_min=220, mem_mb=8000, cpus=1
+    threads: 1
+    conda:
+        "envs/bcftools.yaml"
+    shell:
+        "bcftools stats -F {input.fa} -s - {input.vcf} > {output} 2> {log}"
+
+rule bcftstats_q20dp4mis50noindelsphased:
+    input:
+        vcf="calls/all_merged.q20dp4mis50.noindels.phased.vcf.gz",
+        fa=ref
+    output:
+        "stats/all_merged.q20dp4mis50.noindels.phased.vcf.gz.stats"
+    log:
+        "logs/filter/bcfstats_q20dp4mis50noindelsphased.log"
+    resources: time_min=220, mem_mb=8000, cpus=1
+    threads: 1
+    conda:
+        "envs/bcftools.yaml"
+    shell:
+        "bcftools stats -F {input.fa} -s - {input.vcf} > {output} 2> {log}"
+
 
 
 rule bcfplot_origfile:
@@ -736,6 +831,28 @@ rule beagle_phase_q20dp8mis50noindels:
     resources: time_min=320, mem_mb=20000, cpus=1
     log:
         "logs/beagle/phase_q20dp8mis50noindels.log"
+    shell:
+        "java -jar beagle.22Jul22.46e.jar gt={input} out={params} > {log} 2>&1"
+
+rule beagle_fix_q20dp4mis50noindels:
+    input:
+        "calls/all_merged.q20dp4mis50.noindels.vcf.gz"
+    output:
+        "calls/all_merged.q20dp4mis50.noindels.forBeagle.vcf.gz"
+    resources: time_min=320, mem_mb=8000, cpus=1
+    shell:
+        "zgrep -v super {input} | gzip -c >  {output}"
+
+rule beagle_phase_q20dp4mis50noindels:
+    input:
+        "calls/all_merged.q20dp4mis50.noindels.forBeagle.vcf.gz"
+    output:
+        "calls/all_merged.q20dp4mis50.noindels.phased.vcf.gz"
+    params:
+        "calls/all_merged.q20dp4mis50.noindels.phased"
+    resources: time_min=320, mem_mb=20000, cpus=1
+    log:
+        "logs/beagle/phase_q20dp4mis50noindels.log"
     shell:
         "java -jar beagle.22Jul22.46e.jar gt={input} out={params} > {log} 2>&1"
 
