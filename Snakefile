@@ -174,7 +174,8 @@ rule sambamba_sort:
     log:
         "logs/sambamba-sort/{sample}.log"
     threads: 16
-    resources: time_min=320, mem_mb=40000, cpus=16
+    #resources: time_min=320, mem_mb=40000, cpus=16
+    resources: time_min=320, mem_mb=100000, cpus=16
     wrapper:
         f"{wrappers_version}/bio/sambamba/sort"
 
@@ -190,20 +191,20 @@ rule samtools_index:
         f"{wrappers_version}/bio/samtools/index"
 
 
-rule sambamba_merge:
-    input:
-       ancient(expand("mapped/{sample}.sorted.bam", sample=SAMPLES))
-    output:
-        "mapped/all_merged.bam"
-    log:
-        "logs/sambamba-merge/all_merge.log"
-    params:
-        extra="" # optional additional parameters as string
-    threads:  # Samtools takes additional threads through its option -@
-        32     # This value - 1 will be sent to -@
-    resources: time_min=1320, mem_mb=40000, cpus=32
-    wrapper:
-        f"{wrappers_version}/bio/sambamba/merge"
+#rule sambamba_merge:
+#    input:
+#       ancient(expand("mapped/{sample}.sorted.bam", sample=SAMPLES))
+#    output:
+#        "mapped/all_merged.bam"
+#    log:
+#        "logs/sambamba-merge/all_merge.log"
+#    params:
+#        extra="" # optional additional parameters as string
+#    threads:  # Samtools takes additional threads through its option -@
+#        32     # This value - 1 will be sent to -@
+#    resources: time_min=1320, mem_mb=40000, cpus=32
+#    wrapper:
+#        f"{wrappers_version}/bio/sambamba/merge"
 
 #rule samtools_index_merged:
 #    input:
@@ -217,29 +218,54 @@ rule sambamba_merge:
 #    wrapper:
 #        f"{wrappers_version}/bio/samtools/index"
 
-rule freebayes:
-    input:
-        ref=ref,
-        # you can have a list of samples here
-        alns="mapped/all_merged.bam",
-        # the matching BAI indexes have to present for freebayes
-        idxs="mapped/all_merged.bam.bai"
-        # optional BED file specifying chromosomal regions on which freebayes 
-        # should run, e.g. all regions that show coverage
-        #regions="/path/to/region-file.bed"
-    output:
-        vcf="calls/all_merged.vcf.gz"  # either .vcf or .bcf
-    log:
-        "logs/freebayes/all_merged.log"
-    params:
-        #extra="--min-base-quality 10 --min-supporting-allele-qsum 10 --read-mismatch-limit 3 --min-coverage 5 --min-alternate-count 4 --exclude-unobserved-genotypes --genotype-qualities --ploidy 2 --no-mnps --no-complex --no-indels --mismatch-base-quality-threshold 10",         # optional parameters
-        extra="--min-base-quality 10 --min-supporting-allele-qsum 10 --read-mismatch-limit 3 --min-coverage 4 --min-alternate-count 2 --exclude-unobserved-genotypes --genotype-qualities --mismatch-base-quality-threshold 10 --ploidy 2 -X -i -u",         # optional parameters
-        chunksize=100000, # reference genome chunk size for parallelization (default: 100000)
-        normalize=False,  # flag to use bcftools norm to normalize indels
-    resources: time_min=4320, mem_mb=80000, cpus=32
-    threads: 32
-    wrapper:
-        f"{wrappers_version}/bio/freebayes"
+#rule freebayes:
+#    input:
+#        ref=ref,
+#        # you can have a list of samples here
+#        alns="mapped/all_merged.bam",
+#        # the matching BAI indexes have to present for freebayes
+#        idxs="mapped/all_merged.bam.bai"
+#        # optional BED file specifying chromosomal regions on which freebayes 
+#        # should run, e.g. all regions that show coverage
+#        #regions="/path/to/region-file.bed"
+#    output:
+#        vcf="calls/all_merged.vcf"  # either .vcf or .bcf
+#    log:
+#        "logs/freebayes/all_merged.log"
+#    params:
+#        #extra="--min-base-quality 10 --min-supporting-allele-qsum 10 --read-mismatch-limit 3 --min-coverage 5 --min-alternate-count 4 --exclude-unobserved-genotypes --genotype-qualities --ploidy 2 --no-mnps --no-complex --no-indels --mismatch-base-quality-threshold 10",         # optional parameters
+#        extra="--min-base-quality 10 --min-supporting-allele-qsum 10 --read-mismatch-limit 3 --min-coverage 4 --min-alternate-count 2 --exclude-unobserved-genotypes --genotype-qualities --mismatch-base-quality-threshold 10 --ploidy 2 -X -i -u",         # optional parameters
+#        chunksize=100000, # reference genome chunk size for parallelization (default: 100000)
+#        #normalize=False,  # flag to use bcftools norm to normalize indels
+#        normalize="-a",  # flag to use bcftools norm to normalize indels
+#    resources: time_min=4320, mem_mb=80000, cpus=32
+#    threads: 32
+#    wrapper:
+#        f"{wrappers_version}/bio/freebayes"
+
+#jrule freebayes_bysample:
+#j    input:
+#j        ref=ref,
+#j        # you can have a list of samples here
+#j        alns="mapped/{sample}.sorted.bam",
+#j        # the matching BAI indexes have to present for freebayes
+#j        idxs="mapped/{sample}.sorted.bam.bai"
+#j        # optional BED file specifying chromosomal regions on which freebayes 
+#j        # should run, e.g. all regions that show coverage
+#j        #regions="/path/to/region-file.bed"
+#j    output:
+#j        vcf="calls/{sample}.vcf"  # either .vcf or .bcf
+#j    log:
+#j        "logs/freebayes/{sample}.log"
+#j    params:
+#j        #extra="--min-base-quality 10 --min-supporting-allele-qsum 10 --read-mismatch-limit 3 --min-coverage 5 --min-alternate-count 4 --exclude-unobserved-genotypes --genotype-qualities --ploidy 2 --no-mnps --no-complex --no-indels --mismatch-base-quality-threshold 10",         # optional parameters
+#j        extra="--min-base-quality 10 --min-supporting-allele-qsum 10 --read-mismatch-limit 3 --min-coverage 4 --min-alternate-count 2 --exclude-unobserved-genotypes --genotype-qualities --mismatch-base-quality-threshold 10 --ploidy 2 -X -i -u",         # optional parameters
+#j        chunksize=100000, # reference genome chunk size for parallelization (default: 100000)
+#j        normalize="-a",  # flag to use bcftools norm to normalize indels
+#j    resources: time_min=4320, mem_mb=40000, cpus=16
+#j    threads: 8
+#j    wrapper:
+#j        f"{wrappers_version}/bio/freebayes"
 
 rule freebayes_bysample:
     input:
@@ -252,7 +278,7 @@ rule freebayes_bysample:
         # should run, e.g. all regions that show coverage
         #regions="/path/to/region-file.bed"
     output:
-        vcf="calls/{sample}.vcf.gz"  # either .vcf or .bcf
+        vcf="calls/{sample}.vcf"  # either .vcf or .bcf
     log:
         "logs/freebayes/{sample}.log"
     params:
@@ -260,25 +286,61 @@ rule freebayes_bysample:
         extra="--min-base-quality 10 --min-supporting-allele-qsum 10 --read-mismatch-limit 3 --min-coverage 4 --min-alternate-count 2 --exclude-unobserved-genotypes --genotype-qualities --mismatch-base-quality-threshold 10 --ploidy 2 -X -i -u",         # optional parameters
         chunksize=100000, # reference genome chunk size for parallelization (default: 100000)
         normalize="-a",  # flag to use bcftools norm to normalize indels
-    resources: time_min=4320, mem_mb=20000, cpus=8
+    resources: time_min=4320, mem_mb=40000, cpus=16
     threads: 8
-    wrapper:
-        f"{wrappers_version}/bio/freebayes"
+    conda:
+        "envs/freebayes.yaml"
+    shell:
+        "(freebayes --fasta-reference {input.ref} {params.extra} {input.alns} |  bcftools sort | bcftools norm -a > {output.vcf}) 2> {log}"
+
+rule bgzip_vcf_bysample:
+    input:
+        "calls/{sample}.vcf"
+    output:
+        "calls/{sample}.vcf.gz"
+    threads: 1
+    resources: time_min=220, mem_mb=4000, cpus=1
+    log:
+        "logs/bgzip/{sample}.log"
+    conda:
+        "envs/htslib.yaml"
+    shell:
+        "bgzip {input} {output} 2> {log}"
+
+rule tabix_vcf_bysample:
+    input:
+        "calls/{sample}.vcf.gz"
+    output:
+        "calls/{sample}.vcf.gz.tbi"
+    threads: 1
+    resources: time_min=220, mem_mb=4000, cpus=1
+    log:
+        "logs/tabix/{sample}.log"
+    conda:
+        "envs/tabix.yaml"
+    shell:
+        "tabix -p vcf {input} 2> {log}"
 
 rule bcftools_merge:
     input:
         calls=expand("calls/{sample}.vcf.gz", sample=SAMPLES),
+        tbi=expand("calls/{sample}.vcf.gz.tbi", sample=SAMPLES),
+        #bgzip=expand("calls/{sample}.vcf.gz", sample=SAMPLES),
     output:
-        "calls/all_merged.bysample.vcf.gz",
+        "calls/all_merged.vcf.gz",
     log:
         "logs/bcftools/merge/all.log"
     params:
         uncompressed_bcf=False,
-        extra="",  # optional parameters for bcftools concat (except -o)
+        extra="-Oz",  # optional parameters for bcftools concat (except -o)
     threads: 32
-    resources: time_min=4320, mem_mb=80000, cpus=32
-    wrapper:
-        f"{wrappers_version}/bio/bcftools/merge"
+    resources: time_min=4320, mem_mb=100000, cpus=32
+    #wrapper:
+    #    f"{wrappers_version}/bio/bcftools/merge"
+    conda:
+        "envs/bcftools.yaml"
+    shell:
+        "bcftools merge {params.extra} {input.calls} > {output} 2> {log}"
 
 
 rule bgzip_vcf:
