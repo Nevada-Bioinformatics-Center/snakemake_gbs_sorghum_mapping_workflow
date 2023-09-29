@@ -1,7 +1,13 @@
 #path to basespace files
-input_data: "/data/gpfs/assoc/inbre/projects/melinda_yerka/GBS_progeny/input_gbs_dataset_forsnakemake"
+#input_data: "/data/gpfs/assoc/inbre/projects/melinda_yerka/GBS_progeny/input_gbs_dataset_forsnakemake"
+input_data: "/data/gpfs/assoc/inbre/projects/melinda_yerka/GBS_parentals/input_seq_for_snakemake"
+#ref: "/data/gpfs/assoc/inbre/projects/common_references/sbicolor_454_v3.0.1/Sbicolor_454_v3.0.1.fa"
 ref: "/data/gpfs/assoc/inbre/projects/common_references/Sbicolor_v5.1_fromPhytozome/Sbicolor_730_v5.0.fa"
 ##r1 pattern common for LGC naming convention; user can update this for other types;
 ##Be sure NOT to include your compression type.  The snakmake pipeline will determine if it is compressed with .gz or .bz2
-R1pattern: "_R1_clipped_passed-re-filter.fastq"  
-R2pattern: "_R2_clipped_passed-re-filter.fastq"  
+#R1pattern: "_R1_clipped_passed-re-filter.fastq"  
+#R2pattern: "_R2_clipped_passed-re-filter.fastq"  
+R1pattern: "_R1.fastq"
+R2pattern: "_R2.fastq"
+##For beagle, the pattern for small contig names to be removed from the analysis
+contigremovalpattern: "scaffold"

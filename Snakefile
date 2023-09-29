@@ -6,6 +6,7 @@ inputdirectory=config["input_data"]
 ref=config["ref"]
 R1pattern=config["R1pattern"]
 R2pattern=config["R2pattern"]
+contigremovalpattern=config["contigremovalpattern"]
 print(inputdirectory)
 SAMPLES_GZ, =glob_wildcards(inputdirectory+"/{sample}"+R1pattern+".gz", followlinks=True)
 SAMPLES_BZ2, =glob_wildcards(inputdirectory+"/{sample}"+R1pattern+".bz2", followlinks=True)
@@ -878,9 +879,11 @@ rule beagle_fix_q20dp8mis50noindels:
         "calls/all_merged.q20dp8mis50.noindels.vcf.gz"
     output:
         "calls/all_merged.q20dp8mis50.noindels.forBeagle.vcf.gz"
+    params:
+        contigremovalpattern=contigremovalpattern
     resources: time_min=320, mem_mb=8000, cpus=1
     shell:
-        "zgrep -v super {input} | gzip -c >  {output}"
+        "zgrep -v {params.contigremovalpattern} {input} | gzip -c >  {output}"
 
 rule beagle_phase_q20dp8mis50noindels:
     input:
@@ -901,9 +904,11 @@ rule beagle_fix_q20dp4mis50noindels:
         "calls/all_merged.q20dp4mis50.noindels.vcf.gz"
     output:
         "calls/all_merged.q20dp4mis50.noindels.forBeagle.vcf.gz"
+    params:
+        contigremovalpattern=contigremovalpattern
     resources: time_min=320, mem_mb=8000, cpus=1
     shell:
-        "zgrep -v super {input} | gzip -c >  {output}"
+        "zgrep -v {params.contigremovalpattern} {input} | gzip -c >  {output}"
 
 rule beagle_phase_q20dp4mis50noindels:
     input:
